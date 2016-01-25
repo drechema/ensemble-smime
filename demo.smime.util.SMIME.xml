@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2.1 (Build 705U)" ts="2016-01-25 12:19:06">
+<Class name="demo.smime.util.SMIME">
+<Super>%RegisteredObject</Super>
+<TimeChanged>63902,52869.915174</TimeChanged>
+<TimeCreated>63897,44107.85517</TimeCreated>
+
+<Parameter name="opensslDir">
+<Default>c:\InterSystems\HSAP\bin\</Default>
+</Parameter>
+
+<Property name="platform">
+<Type>%String</Type>
+</Property>
+
+<Method name="sign">
+<FormalSpec><![CDATA[certificatePath:%String,privateKeyPath:%String,inStream:%Stream.Object,&outStream:%Stream.Object]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set outStream = ##class(%Stream.GlobalCharacter).%New()
+	
+	set inFileName = $system.Util.CreateGUID()_".in"
+	set outFileName = $system.Util.CreateGUID()_".out"
+ 	set cmd=$SYSTEM.Util.BinaryDirectory()_"openssl smime -sign -nocerts"_
+ 	                     " -signer "_certificatePath_
+                         " -inkey "_privateKeyPath_
+                         " -in "_inFileName_
+                         " -out "_outFileName
+
+ 	set inFileStream = ##class(%Stream.FileCharacter).%New()
+ 	set tSC = inFileStream.LinkToFile(inFileName) if $$$ISERR(tSC) quit tSC
+ 	set tSC = inFileStream.CopyFrom(inStream) if $$$ISERR(tSC) quit tSC
+ 	set tSC = inFileStream.%Save() if $$$ISERR(tSC) quit tSC
+ 	
+ 	set ret = $zf(-1,cmd)
+ 	if ret'=0 quit $$$ERROR("Error executing command")
+ 	 
+ 	set outFileStream = ##class(%Stream.FileCharacter).%New()
+ 	set tSC = outFileStream.LinkToFile(outFileName) if $$$ISERR(tSC) quit tSC
+ 	set tSC = outStream.CopyFrom(outFileStream) if $$$ISERR(tSC) quit tSC
+ 	set tSC = outStream.%Save() if $$$ISERR(tSC) quit tSC
+	 	
+ 	do ##class(%File).Delete(inFileName)
+ 	do ##class(%File).Delete(outFileName)
+ 	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="verify">
+<FormalSpec><![CDATA[certificatePath:%String,inStream:%Stream.Object,&outStream:%Stream.Object]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set outStream = ##class(%Stream.GlobalCharacter).%New()
+	
+	set inFileName = $system.Util.CreateGUID()_".in"
+	set outFileName = $system.Util.CreateGUID()_".out"
+ 	set cmd=$SYSTEM.Util.BinaryDirectory()_"openssl smime -verify -noverify -nointern"_
+ 	                     " -certfile "_certificatePath_
+                         " -in "_inFileName_
+                         " -out "_outFileName
+
+ 	set inFileStream = ##class(%Stream.FileCharacter).%New()
+ 	set tSC = inFileStream.LinkToFile(inFileName) if $$$ISERR(tSC) quit tSC
+ 	set tSC = inFileStream.CopyFrom(inStream) if $$$ISERR(tSC) quit tSC
+ 	set tSC = inFileStream.%Save() if $$$ISERR(tSC) quit tSC
+ 	
+ 	set ret = $zf(-1,cmd)
+ 	if ret'=0 quit $$$ERROR("Error executing command")
+ 	 
+ 	set outFileStream = ##class(%Stream.FileCharacter).%New()
+ 	set tSC = outFileStream.LinkToFile(outFileName) if $$$ISERR(tSC) quit tSC
+ 	set tSC = outStream.CopyFrom(outFileStream) if $$$ISERR(tSC) quit tSC
+ 	set tSC = outStream.%Save() if $$$ISERR(tSC) quit tSC
+	 	
+ 	do ##class(%File).Delete(inFileName,.return)
+ 	do ##class(%File).Delete(outFileName,.return)
+ 	quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

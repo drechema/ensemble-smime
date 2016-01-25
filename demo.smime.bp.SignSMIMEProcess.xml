@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2.1 (Build 705U)" ts="2016-01-25 12:19:45">
+<Class name="demo.smime.bp.SignSMIMEProcess">
+<ClassType>persistent</ClassType>
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>63904,37725.597763</TimeChanged>
+<TimeCreated>63897,83829.032735</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Default>certPath,keyPath,TargetConfigName</Default>
+</Parameter>
+
+<Property name="certPath">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="keyPath">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="TargetConfigName">
+<Type>%String</Type>
+</Property>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:Ens.StreamContainer,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set smime = ##class(demo.smime.util.SMIME).%New()
+	set tSC = smime.sign(..certPath,..keyPath,pRequest.StreamGet(),.outStream)
+	if $$$ISERR(tSC) quit tSC
+	set reqSMIME = ##class(Ens.StreamContainer).%New()
+	set tSC = reqSMIME.StreamSet(outStream)
+	if $$$ISERR(tSC) quit tSC	
+	if ..TargetConfigName'="" {
+		set tSC = ..SendRequestAsync(..TargetConfigName,reqSMIME,0)
+	}
+	kill smime
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="OnGetConnections">
+<Description>
+Return an array of connections for drawing lines on the config diagram</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pArray:%String,pItem:Ens.Config.Item</FormalSpec>
+<Implementation><![CDATA[
+	Do ##super(.pArray,pItem)
+	If pItem.GetModifiedSetting("TargetConfigName",.tValue) {
+		For i=1:1:$L(tValue,",") { Set tOne=$ZStrip($P(tValue,",",i),"<>W")  Continue:""=tOne  Set pArray(tOne)="" }
+	}
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>SignSMIMEProcessDefaultData</DefaultData>
+<Data name="SignSMIMEProcessDefaultData">
+<Subscript>"SignSMIMEProcess"</Subscript>
+<Value name="1">
+<Value>certPath</Value>
+</Value>
+<Value name="2">
+<Value>keyPath</Value>
+</Value>
+<Value name="3">
+<Value>target</Value>
+</Value>
+<Value name="4">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2.1 (Build 705U)" ts="2016-01-25 12:19:30">
+<Class name="demo.smime.bp.VerifySMIMEProcess">
+<ClassType>persistent</ClassType>
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>63904,38678.711178</TimeChanged>
+<TimeCreated>63897,83829.032735</TimeCreated>
+
+<Parameter name="SETTINGS">
+<Default>certPath,TargetConfigName</Default>
+</Parameter>
+
+<Property name="certPath">
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="TargetConfigName">
+<Type>%String</Type>
+</Property>
+
+<Method name="OnRequest">
+<FormalSpec>pRequest:Ens.StreamContainer,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set smime = ##class(demo.smime.util.SMIME).%New()
+	set tSC = smime.verify(..certPath,pRequest.StreamGet(),.outStream)
+	if $$$ISERR(tSC) quit tSC
+	set req = ##class(Ens.StreamContainer).%New()
+	set tSC = req.StreamSet(outStream)
+	if $$$ISERR(tSC) quit tSC	
+	if ..TargetConfigName'="" {
+		set tSC = ..SendRequestAsync(..TargetConfigName,req,0)
+	}
+	kill smime
+	Quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="OnGetConnections">
+<Description>
+Return an array of connections for drawing lines on the config diagram</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*pArray:%String,pItem:Ens.Config.Item</FormalSpec>
+<Implementation><![CDATA[
+	Do ##super(.pArray,pItem)
+	If pItem.GetModifiedSetting("TargetConfigName",.tValue) {
+		For i=1:1:$L(tValue,",") { Set tOne=$ZStrip($P(tValue,",",i),"<>W")  Continue:""=tOne  Set pArray(tOne)="" }
+	}
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>VerifySMIMEProcessDefaultData</DefaultData>
+<Data name="VerifySMIMEProcessDefaultData">
+<Subscript>"VerifySMIMEProcess"</Subscript>
+<Value name="1">
+<Value>certPath</Value>
+</Value>
+<Value name="2">
+<Value>target</Value>
+</Value>
+<Value name="3">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

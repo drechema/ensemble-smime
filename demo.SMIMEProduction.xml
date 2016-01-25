@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2015.2.1 (Build 705U)" ts="2016-01-25 12:18:29">
+<Class name="demo.SMIMEProduction">
+<Super>Ens.Production</Super>
+<TimeChanged>63908,46101.594383</TimeChanged>
+<TimeCreated>63897,83861.77749</TimeCreated>
+
+<XData name="ProductionDefinition">
+<Data><![CDATA[
+<Production Name="demo.SMIMEProduction" TestingEnabled="true" LogGeneralTraceEvents="false">
+  <Description></Description>
+  <ActorPoolSize>2</ActorPoolSize>
+  <Item Name="FileIn" Category="Test" ClassName="EnsLib.File.PassthroughService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Host" Name="TargetConfigNames">SignProcess</Setting>
+    <Setting Target="Adapter" Name="FilePath">c:\tmp\in</Setting>
+  </Item>
+  <Item Name="FileOut" Category="Test" ClassName="EnsLib.File.PassthroughOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="Para pruebas" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="FilePath">c:\tmp\out</Setting>
+    <Setting Target="Host" Name="Filename">%f_%Q%!+(_a).smime</Setting>
+  </Item>
+  <Item Name="SignProcess" Category="Sign,Test" ClassName="demo.smime.bp.SignSMIMEProcess" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Host" Name="certPath">C:\tmp\cert\david-certificate.pem</Setting>
+    <Setting Target="Host" Name="keyPath">C:\tmp\cert\david-private.pem</Setting>
+    <Setting Target="Host" Name="TargetConfigName">FileOut</Setting>
+  </Item>
+  <Item Name="VerifyProcess" Category="Verify,Test" ClassName="demo.smime.bp.VerifySMIMEProcess" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Host" Name="certPath">C:\tmp\cert\david-certificate.pem</Setting>
+    <Setting Target="Host" Name="TargetConfigName">VerifyHttpOut</Setting>
+  </Item>
+</Production>
+]]></Data>
+</XData>
+</Class>
+</Export>
